@@ -2,7 +2,7 @@ This is a library for the Si4713 FM Radio Transmitter with RDS
 
   Designed specifically to work with the Si4713 breakout in the
   adafruit shop
-  ----> https://www.adafruit.com/products/
+  ----> https://www.adafruit.com/products/1958
 
   These sensors use I2C to communicate + a reset pin, 3 pins are required to  
   interface
