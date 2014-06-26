@@ -3,9 +3,9 @@
 
   Designed specifically to work with the Si4713 breakout in the
   adafruit shop
-  ----> https://www.adafruit.com/products/
+  ----> https://www.adafruit.com/products/1958
 
-  These sensors use I2C to communicate, plus reset pin. 
+  These transmitters use I2C to communicate, plus reset pin. 
   3 pins are required to interface
   Adafruit invests time and resources providing this open source code, 
   please support Adafruit and open-source hardware by purchasing 
