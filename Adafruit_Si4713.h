@@ -111,8 +111,6 @@ class Adafruit_Si4713  {
   void setRDSstation(char *s);
   void setRDSbuffer(char *s);
 
-  void setGain(void);
-
   uint16_t currFreq;
   uint8_t currdBuV, currAntCap, currNoiseLevel, currASQ;
   int8_t currInLevel;

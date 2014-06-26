@@ -47,7 +47,7 @@ void setup() {
    */
 
   Serial.print("\nSet TX power");
-  radio.setTXpower(110);
+  radio.setTXpower(115);  // dBuV, 88-115 max
 
   Serial.print("\nTuning into "); 
   Serial.print(FMSTATION/100); 
@@ -70,7 +70,6 @@ void setup() {
   radio.setRDSbuffer( "Adafruit g0th Radio!");
 
   Serial.println("RDS on!");  
-  radio.setGain();
 
   radio.setGPIOctrl(_BV(1) | _BV(2));  // set GP1 and GP2 to output
 }

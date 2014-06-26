@@ -297,14 +297,6 @@ void Adafruit_Si4713::setRDSbuffer(char *s) {
    */
 }
 
-void Adafruit_Si4713::setGain(void) {
-  _i2ccommand[0] =  SI4710_CMD_TX_AGC_OVERRIDE;
-  _i2ccommand[1] = 0x01;
-  _i2ccommand[2] = 20;
-sendCommand(3);
-			      
-}
-
 uint8_t Adafruit_Si4713::getStatus(void) {
 
    Wire.beginTransmission(_i2caddr);
