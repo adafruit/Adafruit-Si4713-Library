@@ -304,7 +304,9 @@ uint8_t Adafruit_Si4713::getStatus(void) {
    Wire.endTransmission();
    Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)1);  
    while (Wire.available() < 1) {
-     Serial.print('.');
+#ifdef SI4713_CMD_DEBUG
+    Serial.print('.');
+#endif 
      delay(1);
    }
    return  Wire.read();
