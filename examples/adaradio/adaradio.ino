@@ -20,6 +20,7 @@
 
 #include <Wire.h>
 #include <Adafruit_Si4713.h>
+#define _BV(n) (1 << n)
 
 #define RESETPIN 12
 
