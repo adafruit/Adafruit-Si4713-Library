@@ -5,7 +5,7 @@ Adafruit-Si4713-Library [![Build Status](https://travis-ci.com/adafruit/Adafruit
 
 This is the Adafruit FM Transmitter with RDS/RBDS Breakout - Si4713 library
 
-Tested and works great with the Adafruit MCP9808 Breakout Board 
+Tested and works great with the Adafruit Si4713 Breakout Board 
 * http://www.adafruit.com/products/1958
 
 These transmitters use I2C to communicate, plus reset pin, 3 pins are required to interface
