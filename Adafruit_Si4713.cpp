@@ -64,8 +64,7 @@ bool Adafruit_Si4713::begin(uint8_t addr, TwoWire *theWire) {
 }
 
 /*!
- *    @brief  Resets the registers to default settings and puts it in powerdown
- * mode.
+ *    @brief  Resets the registers to default settings and puts chip in powerdown mode
  */
 void Adafruit_Si4713::reset() {
   if (_rst > 0) {
