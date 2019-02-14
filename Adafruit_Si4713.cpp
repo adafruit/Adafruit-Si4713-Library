@@ -38,7 +38,7 @@
 Adafruit_Si4713::Adafruit_Si4713(int8_t resetpin) { _rst = resetpin; }
 
 /*!
- *    @brief  Setups the HW
+ *    @brief  Setups the i2c and calls powerUp function.
  *    @param  addr
  *            i2c address
  *    @return True if initialization was successful, otherwise false.
@@ -61,7 +61,7 @@ bool Adafruit_Si4713::begin(uint8_t addr) {
 }
 
 /*!
- *    @brief  Reset breakout
+ *    @brief  Resets the registers to default settings and puts it in powerdown mode.
  */
 void Adafruit_Si4713::reset() {
   if (_rst > 0) {
@@ -75,7 +75,7 @@ void Adafruit_Si4713::reset() {
 }
 
 /*!
- *    @brief  Sets Property
+ *    @brief  Set Property
  *    @param  property
  *            prooperty that will be set
  *    @param  value
@@ -141,7 +141,7 @@ void Adafruit_Si4713::sendCommand(uint8_t len) {
 }
 
 /*!
- *    @brief  Tunes FM to freq
+ *    @brief  Tunes to given transmit frequency.
  *    @param  freqKHz
  *            frequency in KHz
  */
@@ -157,11 +157,11 @@ void Adafruit_Si4713::tuneFM(uint16_t freqKHz) {
 }
 
 /*!
- *    @brief  Sets TX Power
+ *    @brief  Sets the output power level and tunes the antenna capacitor
  *    @param  pwr
  *            power value
  *    @param  antcap
- * 	          antenna capacitor
+ * 	          antenna capacitor (default to 0)
  */
 void Adafruit_Si4713::setTXpower(uint8_t pwr, uint8_t antcap) {
   _i2ccommand[0] = SI4710_CMD_TX_TUNE_POWER;
@@ -172,7 +172,7 @@ void Adafruit_Si4713::setTXpower(uint8_t pwr, uint8_t antcap) {
   sendCommand(5);
 }
 /*!
- *    @brief  Read ASQ Level
+ *    @brief  Queries the TX status and input audio signal metrics.
  */
 void Adafruit_Si4713::readASQ() {
   _i2ccommand[0] = SI4710_CMD_TX_ASQ_STATUS;
@@ -189,7 +189,8 @@ void Adafruit_Si4713::readASQ() {
 }
 
 /*!
- *    @brief  Read Tune Status
+ *    @brief  Queries the status of a previously sent TX Tune Freq, TX Tune Power,
+ *            or TX Tune Measure using SI4710_CMD_TX_TUNE_STATUS command.
  */
 void Adafruit_Si4713::readTuneStatus() {
   _i2ccommand[0] = SI4710_CMD_TX_TUNE_STATUS;
@@ -210,7 +211,8 @@ void Adafruit_Si4713::readTuneStatus() {
 }
 
 /*!
- *    @brief  Read Tune Measure
+ *    @brief  Measure the received noise level at the specified frequency using
+ *            SI4710_CMD_TX_TUNE_MEASURE command. 
  *    @param  freq
  *            frequency
  */
@@ -232,9 +234,20 @@ void Adafruit_Si4713::readTuneMeasure(uint16_t freq) {
 }
 
 /*!
- *    @brief  Starts RDS
+ *    @brief  Begin RDS
+ *            Sets properties as follows:
+ *            SI4713_PROP_TX_AUDIO_DEVIATION: 66.25KHz,
+ *            SI4713_PROP_TX_RDS_DEVIATION: 2KHz,
+ *            SI4713_PROP_TX_RDS_INTERRUPT_SOURCE: 1,
+ *            SI4713_PROP_TX_RDS_PS_MIX: 50% mix (default value),
+ *            SI4713_PROP_TX_RDS_PS_MISC: 6152,
+ *            SI4713_PROP_TX_RDS_PS_REPEAT_COUNT: 3,
+ *            SI4713_PROP_TX_RDS_MESSAGE_COUNT: 1,
+ *            SI4713_PROP_TX_RDS_PS_AF: 57568,
+ *            SI4713_PROP_TX_RDS_FIFO_SIZE: 0,
+ *            SI4713_PROP_TX_COMPONENT_ENABLE: 7
  *    @param  programID
- *            program ID
+ *            sets SI4713_PROP_TX_RDS_PI to parameter value
  */
 void Adafruit_Si4713::beginRDS(uint16_t programID) {
   // 66.25KHz (default is 68.25)
@@ -262,9 +275,9 @@ void Adafruit_Si4713::beginRDS(uint16_t programID) {
 }
 
 /*!
- *    @brief  set RDS Station on certain slot
+ *    @brief  Set up default PS strings
  *    @param  *s
- *            slot
+ *            strings to load
  */
 void Adafruit_Si4713::setRDSstation(char *s) {
   uint8_t i, len = strlen(s);
@@ -285,9 +298,9 @@ void Adafruit_Si4713::setRDSstation(char *s) {
 }
 
 /*!
- *    @brief  set RDS Buffer on certain slot
+ *    @brief  Queries the status of the RDS Group Buffer and loads new data into buffer.
  *    @param  *s
- *            slot
+ *            strings to load
  */
 void Adafruit_Si4713::setRDSbuffer(char *s) {
   uint8_t i, len = strlen(s);
@@ -388,7 +401,12 @@ uint8_t Adafruit_Si4713::getStatus() {
 }
 
 /*!
- *    @brief  Powers breakout up
+ *    @brief  Sends power up command to the breakout, than CTS and GPO2 output is disabled and than enable xtal oscilator.
+ *            Also It sets properties:
+ *            SI4713_PROP_REFCLK_FREQ: 32.768
+ *            SI4713_PROP_TX_PREEMPHASIS: 74uS pre-emph (USA standard)
+ *            SI4713_PROP_TX_ACOMP_GAIN: max gain
+ *            SI4713_PROP_TX_ACOMP_ENABLE: turned on limiter and AGC
  */
 void Adafruit_Si4713::powerUp() {
   _i2ccommand[0] = SI4710_CMD_POWER_UP;
@@ -411,7 +429,7 @@ void Adafruit_Si4713::powerUp() {
 }
 
 /*!
- *    @brief  Get a HW revision
+ *    @brief  Get the hardware revision code from the device using SI4710_CMD_GET_REV
  *    @return revision number
  */
 uint8_t Adafruit_Si4713::getRev() {
@@ -448,9 +466,9 @@ uint8_t Adafruit_Si4713::getRev() {
 }
 
 /*!
- *    @brief  Set GPIO direction
+ *    @brief  Configures GP1 / GP2 as output or Hi-Z.
  *    @param  x
- *            [output / input]
+ *            bit value
  */
 void Adafruit_Si4713::setGPIOctrl(uint8_t x) {
   // Serial.println("GPIO direction");
@@ -461,8 +479,9 @@ void Adafruit_Si4713::setGPIOctrl(uint8_t x) {
 }
 
 /*!
- *    @brief  Set GPIO 
+ *    @brief  Sets GP1 / GP2 output level (low or high).
  *    @param  x
+ *            bit value
  */
 void Adafruit_Si4713::setGPIO(uint8_t x) {
   // Serial.println("GPIO set");
