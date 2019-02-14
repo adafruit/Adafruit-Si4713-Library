@@ -41,13 +41,16 @@ Adafruit_Si4713::Adafruit_Si4713(int8_t resetpin) { _rst = resetpin; }
  *    @brief  Setups the i2c and calls powerUp function.
  *    @param  addr
  *            i2c address
+ *    @param  theWire
+ *            wire object
  *    @return True if initialization was successful, otherwise false.
  *
  */
-bool Adafruit_Si4713::begin(uint8_t addr) {
-  Wire.begin();
-
+bool Adafruit_Si4713::begin(uint8_t addr, TwoWire *theWire) {
   _i2caddr = addr;
+  _wire = theWire;
+
+  _wire->begin();
 
   reset();
 
@@ -61,7 +64,8 @@ bool Adafruit_Si4713::begin(uint8_t addr) {
 }
 
 /*!
- *    @brief  Resets the registers to default settings and puts it in powerdown mode.
+ *    @brief  Resets the registers to default settings and puts it in powerdown
+ * mode.
  */
 void Adafruit_Si4713::reset() {
   if (_rst > 0) {
@@ -107,23 +111,23 @@ void Adafruit_Si4713::sendCommand(uint8_t len) {
 #ifdef SI4713_CMD_DEBUG
   Serial.print("\n*** Command:");
 #endif
-  Wire.beginTransmission(_i2caddr);
+  _wire->beginTransmission(_i2caddr);
   for (uint8_t i = 0; i < len; i++) {
 #ifdef SI4713_CMD_DEBUG
     Serial.print(" 0x");
     Serial.print(_i2ccommand[i], HEX);
 #endif
-    Wire.write(_i2ccommand[i]);
+    _wire->write(_i2ccommand[i]);
   }
-  Wire.endTransmission();
+  _wire->endTransmission();
 #ifdef SI4713_CMD_DEBUG
   Serial.println();
 #endif
   // Wait for status CTS bit
   uint8_t status = 0, timeout = 100;
   while (!(status & SI4710_STATUS_CTS)) {
-    Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)1);
-    while ((Wire.available() < 1) & (timeout != 0)) {
+    _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
+    while ((_wire->available() < 1) & (timeout != 0)) {
       // Serial.print('.');
       delay(1);
       timeout--;
@@ -132,7 +136,7 @@ void Adafruit_Si4713::sendCommand(uint8_t len) {
       status = 0;
       return;
     }
-    status = Wire.read();
+    status = _wire->read();
 #ifdef SI4713_CMD_DEBUG
     Serial.print("status: ");
     Serial.println(status, HEX);
@@ -179,40 +183,40 @@ void Adafruit_Si4713::readASQ() {
   _i2ccommand[1] = 0x1;
   sendCommand(2);
 
-  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)5);
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)5);
 
-  Wire.read();           // status
-  currASQ = Wire.read(); // resp1
-  Wire.read();           // resp2 unused
-  Wire.read();           // resp3 unused
-  currInLevel = Wire.read();
+  _wire->read();           // status
+  currASQ = _wire->read(); // resp1
+  _wire->read();           // resp2 unused
+  _wire->read();           // resp3 unused
+  currInLevel = _wire->read();
 }
 
 /*!
- *    @brief  Queries the status of a previously sent TX Tune Freq, TX Tune Power,
- *            or TX Tune Measure using SI4710_CMD_TX_TUNE_STATUS command.
+ *    @brief  Queries the status of a previously sent TX Tune Freq, TX Tune
+ * Power, or TX Tune Measure using SI4710_CMD_TX_TUNE_STATUS command.
  */
 void Adafruit_Si4713::readTuneStatus() {
   _i2ccommand[0] = SI4710_CMD_TX_TUNE_STATUS;
   _i2ccommand[1] = 0x1; // INTACK
   sendCommand(2);
 
-  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)8);
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)8);
 
-  Wire.read();
-  Wire.read();            // status and resp1
-  currFreq = Wire.read(); // resp2
+  _wire->read();
+  _wire->read();            // status and resp1
+  currFreq = _wire->read(); // resp2
   currFreq <<= 8;
-  currFreq |= Wire.read(); // resp3
-  Wire.read();             // resp4
-  currdBuV = Wire.read();
-  currAntCap = Wire.read();
-  currNoiseLevel = Wire.read();
+  currFreq |= _wire->read(); // resp3
+  _wire->read();             // resp4
+  currdBuV = _wire->read();
+  currAntCap = _wire->read();
+  currNoiseLevel = _wire->read();
 }
 
 /*!
  *    @brief  Measure the received noise level at the specified frequency using
- *            SI4710_CMD_TX_TUNE_MEASURE command. 
+ *            SI4710_CMD_TX_TUNE_MEASURE command.
  *    @param  freq
  *            frequency
  */
@@ -298,7 +302,8 @@ void Adafruit_Si4713::setRDSstation(char *s) {
 }
 
 /*!
- *    @brief  Queries the status of the RDS Group Buffer and loads new data into buffer.
+ *    @brief  Queries the status of the RDS Group Buffer and loads new data into
+ * buffer.
  *    @param  *s
  *            strings to load
  */
@@ -387,22 +392,22 @@ void Adafruit_Si4713::setRDSbuffer(char *s) {
  *    @return status bits
  */
 uint8_t Adafruit_Si4713::getStatus() {
-  Wire.beginTransmission(_i2caddr);
-  Wire.write(SI4710_CMD_GET_INT_STATUS);
-  Wire.endTransmission();
-  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)1);
-  while (Wire.available() < 1) {
+  _wire->beginTransmission(_i2caddr);
+  _wire->write(SI4710_CMD_GET_INT_STATUS);
+  _wire->endTransmission();
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
+  while (_wire->available() < 1) {
 #ifdef SI4713_CMD_DEBUG
     Serial.print('.');
 #endif
     delay(1);
   }
-  return Wire.read();
+  return _wire->read();
 }
 
 /*!
- *    @brief  Sends power up command to the breakout, than CTS and GPO2 output is disabled and than enable xtal oscilator.
- *            Also It sets properties:
+ *    @brief  Sends power up command to the breakout, than CTS and GPO2 output
+ * is disabled and than enable xtal oscilator. Also It sets properties:
  *            SI4713_PROP_REFCLK_FREQ: 32.768
  *            SI4713_PROP_TX_PREEMPHASIS: 74uS pre-emph (USA standard)
  *            SI4713_PROP_TX_ACOMP_GAIN: max gain
@@ -429,7 +434,8 @@ void Adafruit_Si4713::powerUp() {
 }
 
 /*!
- *    @brief  Get the hardware revision code from the device using SI4710_CMD_GET_REV
+ *    @brief  Get the hardware revision code from the device using
+ * SI4710_CMD_GET_REV
  *    @return revision number
  */
 uint8_t Adafruit_Si4713::getRev() {
@@ -438,20 +444,20 @@ uint8_t Adafruit_Si4713::getRev() {
 
   sendCommand(2);
 
-  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)9);
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)9);
 
-  Wire.read();
-  uint8_t pn = Wire.read();
-  uint8_t fw = Wire.read();
+  _wire->read();
+  uint8_t pn = _wire->read();
+  uint8_t fw = _wire->read();
   fw <<= 8;
-  fw |= Wire.read();
-  uint8_t patch = Wire.read();
+  fw |= _wire->read();
+  uint8_t patch = _wire->read();
   patch <<= 8;
-  patch |= Wire.read();
-  uint8_t cmp = Wire.read();
+  patch |= _wire->read();
+  uint8_t cmp = _wire->read();
   cmp <<= 8;
-  cmp |= Wire.read();
-  uint8_t chiprev = Wire.read();
+  cmp |= _wire->read();
+  uint8_t chiprev = _wire->read();
 
   /*
   Serial.print("Part # Si47"); Serial.print(pn);

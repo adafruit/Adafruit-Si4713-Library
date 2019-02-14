@@ -155,7 +155,7 @@
 class Adafruit_Si4713 {
 public:
   Adafruit_Si4713(int8_t rstpin = -1);
-  boolean begin(uint8_t addr = SI4710_ADDR1);
+  boolean begin(uint8_t addr = SI4710_ADDR1, TwoWire *theWire = &Wire);
   void reset();
 
   void powerUp();
@@ -191,4 +191,5 @@ private:
   int8_t _rst;
   uint8_t _i2ccommand[10]; // holds the command buffer
   uint8_t _i2caddr;
+  TwoWire *_wire;
 };
