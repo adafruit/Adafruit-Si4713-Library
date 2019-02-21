@@ -78,7 +78,7 @@ void Adafruit_Si4713::reset() {
 }
 
 /*!
- *    @brief  Set Property
+ *    @brief  Set chip property over I2C
  *    @param  property
  *            prooperty that will be set
  *    @param  value
@@ -102,7 +102,7 @@ void Adafruit_Si4713::setProperty(uint16_t property, uint16_t value) {
 }
 
 /*!
- *    @brief  Sends command to Si4713
+ *    @brief  Send command stored in _i2ccommand to chip.
  *    @param  len
  *            length of command that will be send
  */
@@ -278,9 +278,9 @@ void Adafruit_Si4713::beginRDS(uint16_t programID) {
 }
 
 /*!
- *    @brief  Set up default PS strings
+ *    @brief  Set up the RDS station string
  *    @param  *s
- *            strings to load
+ *            string to load
  */
 void Adafruit_Si4713::setRDSstation(char *s) {
   uint8_t i, len = strlen(s);
@@ -304,7 +304,7 @@ void Adafruit_Si4713::setRDSstation(char *s) {
  *    @brief  Queries the status of the RDS Group Buffer and loads new data into
  * buffer.
  *    @param  *s
- *            strings to load
+ *            string to load
  */
 void Adafruit_Si4713::setRDSbuffer(char *s) {
   uint8_t i, len = strlen(s);
