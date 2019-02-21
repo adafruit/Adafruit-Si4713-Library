@@ -64,7 +64,8 @@ bool Adafruit_Si4713::begin(uint8_t addr, TwoWire *theWire) {
 }
 
 /*!
- *    @brief  Resets the registers to default settings and puts chip in powerdown mode
+ *    @brief  Resets the registers to default settings and puts chip in
+ * powerdown mode
  */
 void Adafruit_Si4713::reset() {
   if (_rst > 0) {
@@ -288,7 +289,7 @@ void Adafruit_Si4713::setRDSstation(char *s) {
 
   for (uint8_t i = 0; i < slots; i++) {
     memset(_i2ccommand, ' ', 6); // clear it with ' '
-    memcpy(_i2ccommand + 2, s, min(4, strlen(s)));
+    memcpy(_i2ccommand + 2, s, min(4, (int)strlen(s)));
     s += 4;
     _i2ccommand[6] = 0;
     // Serial.print("Set slot #"); Serial.print(i);
@@ -313,7 +314,7 @@ void Adafruit_Si4713::setRDSbuffer(char *s) {
 
   for (uint8_t i = 0; i < slots; i++) {
     memset(_i2ccommand, ' ', 8); // clear it with ' '
-    memcpy(_i2ccommand + 4, s, min(4, strlen(s)));
+    memcpy(_i2ccommand + 4, s, min(4, (int)strlen(s)));
     s += 4;
     _i2ccommand[8] = 0;
     // Serial.print("Set buff #"); Serial.print(i);
