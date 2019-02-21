@@ -155,7 +155,7 @@
 class Adafruit_Si4713 {
 public:
   Adafruit_Si4713(int8_t rstpin = -1);
-  boolean begin(uint8_t addr = SI4710_ADDR1, TwoWire *theWire = &Wire);
+  bool begin(uint8_t addr = SI4710_ADDR1, TwoWire *theWire = &Wire);
   void reset();
 
   void powerUp();
