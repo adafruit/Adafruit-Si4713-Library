@@ -124,18 +124,9 @@ void Adafruit_Si4713::sendCommand(uint8_t len) {
   Serial.println();
 #endif
   // Wait for status CTS bit
-  uint8_t status = 0, timeout = 100;
+  uint8_t status = 0;
   while (!(status & SI4710_STATUS_CTS)) {
     _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
-    while ((_wire->available() < 1) & (timeout != 0)) {
-      // Serial.print('.');
-      delay(1);
-      timeout--;
-    }
-    if (timeout == 0) {
-      status = 0;
-      return;
-    }
     status = _wire->read();
 #ifdef SI4713_CMD_DEBUG
     Serial.print("status: ");
@@ -396,12 +387,6 @@ uint8_t Adafruit_Si4713::getStatus() {
   _wire->write(SI4710_CMD_GET_INT_STATUS);
   _wire->endTransmission();
   _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
-  while (_wire->available() < 1) {
-#ifdef SI4713_CMD_DEBUG
-    Serial.print('.');
-#endif
-    delay(1);
-  }
   return _wire->read();
 }
 
