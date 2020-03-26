@@ -1,5 +1,5 @@
-Adafruit-Si4713-Library [![Build Status](https://travis-ci.com/adafruit/Adafruit-Si4713-Library.svg?branch=master)](https://travis-ci.com/adafruit/Adafruit-Si4713-Library)
-================
+# Adafruit-Si4713-Library [![Build Status](https://github.com/adafruit/Adafruit-Si4713-Library/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit-Si4713-Library/actions)
+
 
 <a href="https://www.adafruit.com/product/1958"><img src="assets/board.jpg?raw=true" width="500px"></a>
 
