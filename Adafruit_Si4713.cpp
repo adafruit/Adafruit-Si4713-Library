@@ -47,10 +47,11 @@ Adafruit_Si4713::Adafruit_Si4713(int8_t resetpin) { _rst = resetpin; }
  *
  */
 bool Adafruit_Si4713::begin(uint8_t addr, TwoWire *theWire) {
-  _i2caddr = addr;
-  _wire = theWire;
-
-  _wire->begin();
+  if (i2c_dev)
+    delete i2c_dev;
+  i2c_dev = new Adafruit_I2CDevice(addr, theWire);
+  if (!i2c_dev->begin())
+    return false;
 
   reset();
 
@@ -108,31 +109,12 @@ void Adafruit_Si4713::setProperty(uint16_t property, uint16_t value) {
  *            length of command that will be send
  */
 void Adafruit_Si4713::sendCommand(uint8_t len) {
-#ifdef SI4713_CMD_DEBUG
-  Serial.print("\n*** Command:");
-#endif
-  _wire->beginTransmission(_i2caddr);
-  for (uint8_t i = 0; i < len; i++) {
-#ifdef SI4713_CMD_DEBUG
-    Serial.print(" 0x");
-    Serial.print(_i2ccommand[i], HEX);
-#endif
-    _wire->write(_i2ccommand[i]);
-  }
-  _wire->endTransmission();
-#ifdef SI4713_CMD_DEBUG
-  Serial.println();
-#endif
+  // Send command
+  i2c_dev->write(_i2ccommand, len);
   // Wait for status CTS bit
   uint8_t status = 0;
-  while (!(status & SI4710_STATUS_CTS)) {
-    _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
-    status = _wire->read();
-#ifdef SI4713_CMD_DEBUG
-    Serial.print("status: ");
-    Serial.println(status, HEX);
-#endif
-  }
+  while (!(status & SI4710_STATUS_CTS))
+    i2c_dev->read(&status, 1);
 }
 
 /*!
@@ -174,13 +156,10 @@ void Adafruit_Si4713::readASQ() {
   _i2ccommand[1] = 0x1;
   sendCommand(2);
 
-  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)5);
-
-  _wire->read();           // status
-  currASQ = _wire->read(); // resp1
-  _wire->read();           // resp2 unused
-  _wire->read();           // resp3 unused
-  currInLevel = _wire->read();
+  uint8_t resp[5];
+  i2c_dev->read(resp, 5);
+  currASQ = resp[1];
+  currInLevel = resp[4];
 }
 
 /*!
@@ -192,17 +171,12 @@ void Adafruit_Si4713::readTuneStatus() {
   _i2ccommand[1] = 0x1; // INTACK
   sendCommand(2);
 
-  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)8);
-
-  _wire->read();
-  _wire->read();            // status and resp1
-  currFreq = _wire->read(); // resp2
-  currFreq <<= 8;
-  currFreq |= _wire->read(); // resp3
-  _wire->read();             // resp4
-  currdBuV = _wire->read();
-  currAntCap = _wire->read();
-  currNoiseLevel = _wire->read();
+  uint8_t resp[8];
+  i2c_dev->read(resp, 8);
+  currFreq = (uint16_t(resp[2]) << 8) | resp[3];
+  currdBuV = resp[5];
+  currAntCap = resp[6];
+  currNoiseLevel = resp[7];
 }
 
 /*!
@@ -235,38 +209,29 @@ void Adafruit_Si4713::readTuneMeasure(uint16_t freq) {
  *            SI4713_PROP_TX_RDS_DEVIATION: 2KHz,
  *            SI4713_PROP_TX_RDS_INTERRUPT_SOURCE: 1,
  *            SI4713_PROP_TX_RDS_PS_MIX: 50% mix (default value),
- *            SI4713_PROP_TX_RDS_PS_MISC: 6152,
+ *            SI4713_PROP_TX_RDS_PS_MISC: 0x1008,
  *            SI4713_PROP_TX_RDS_PS_REPEAT_COUNT: 3,
  *            SI4713_PROP_TX_RDS_MESSAGE_COUNT: 1,
- *            SI4713_PROP_TX_RDS_PS_AF: 57568,
+ *            SI4713_PROP_TX_RDS_PS_AF: 0xE0E0,
  *            SI4713_PROP_TX_RDS_FIFO_SIZE: 0,
  *            SI4713_PROP_TX_COMPONENT_ENABLE: 7
  *    @param  programID
  *            sets SI4713_PROP_TX_RDS_PI to parameter value
  */
 void Adafruit_Si4713::beginRDS(uint16_t programID) {
-  // 66.25KHz (default is 68.25)
-  setProperty(SI4713_PROP_TX_AUDIO_DEVIATION, 6625);
-
-  // 2KHz (default)
-  setProperty(SI4713_PROP_TX_RDS_DEVIATION, 200);
-
-  // RDS IRQ
-  setProperty(SI4713_PROP_TX_RDS_INTERRUPT_SOURCE, 0x0001);
-  // program identifier
-  setProperty(SI4713_PROP_TX_RDS_PI, programID);
-  // 50% mix (default)
-  setProperty(SI4713_PROP_TX_RDS_PS_MIX, 0x03);
-  // RDSD0 & RDSMS (default)
-  setProperty(SI4713_PROP_TX_RDS_PS_MISC, 0x1808);
-  // 3 repeats (default)
-  setProperty(SI4713_PROP_TX_RDS_PS_REPEAT_COUNT, 3);
-
-  setProperty(SI4713_PROP_TX_RDS_MESSAGE_COUNT, 1);
-  setProperty(SI4713_PROP_TX_RDS_PS_AF, 0xE0E0); // no AF
-  setProperty(SI4713_PROP_TX_RDS_FIFO_SIZE, 0);
-
-  setProperty(SI4713_PROP_TX_COMPONENT_ENABLE, 0x0007);
+  setProperty(SI4713_PROP_TX_AUDIO_DEVIATION,
+              6625);                              // 66.25KHz (default is 68.25)
+  setProperty(SI4713_PROP_TX_RDS_DEVIATION, 200); // 2KHz (default)
+  setProperty(SI4713_PROP_TX_RDS_INTERRUPT_SOURCE, 0x0001); // RDS IRQ
+  setProperty(SI4713_PROP_TX_RDS_PI, programID);      // program identifier
+  setProperty(SI4713_PROP_TX_RDS_PS_MIX, 0x03);       // 50% mix (default)
+  setProperty(SI4713_PROP_TX_RDS_PS_MISC, 0x1008);    // RDSD0 & RDSMS (default)
+  setProperty(SI4713_PROP_TX_RDS_PS_REPEAT_COUNT, 3); // 3 repeats (default)
+  setProperty(SI4713_PROP_TX_RDS_MESSAGE_COUNT, 1);   // 1 message (default)
+  setProperty(SI4713_PROP_TX_RDS_PS_AF, 0xE0E0);      // no AF (default)
+  setProperty(SI4713_PROP_TX_RDS_FIFO_SIZE, 0);       // no FIFO (default)
+  setProperty(SI4713_PROP_TX_COMPONENT_ENABLE,
+              0x0007); // enable RDS, stereo, tone
 }
 
 /*!
@@ -275,7 +240,7 @@ void Adafruit_Si4713::beginRDS(uint16_t programID) {
  *            string to load
  */
 void Adafruit_Si4713::setRDSstation(char *s) {
-  uint8_t i, len = strlen(s);
+  uint8_t len = strlen(s);
   uint8_t slots = (len + 3) / 4;
 
   for (uint8_t i = 0; i < slots; i++) {
@@ -283,9 +248,14 @@ void Adafruit_Si4713::setRDSstation(char *s) {
     memcpy(_i2ccommand + 2, s, min(4, (int)strlen(s)));
     s += 4;
     _i2ccommand[6] = 0;
-    // Serial.print("Set slot #"); Serial.print(i);
-    // char *slot = (char *)( _i2ccommand+2);
-    // Serial.print(" to '"); Serial.print(slot); Serial.println("'");
+#ifdef SI4713_CMD_DEBUG
+    Serial.print("Set slot #");
+    Serial.print(i);
+    char *slot = (char *)(_i2ccommand + 2);
+    Serial.print(" to '");
+    Serial.print(slot);
+    Serial.println("'");
+#endif
     _i2ccommand[0] = SI4710_CMD_TX_RDS_PS;
     _i2ccommand[1] = i; // slot #
     sendCommand(6);
@@ -299,7 +269,7 @@ void Adafruit_Si4713::setRDSstation(char *s) {
  *            string to load
  */
 void Adafruit_Si4713::setRDSbuffer(char *s) {
-  uint8_t i, len = strlen(s);
+  uint8_t len = strlen(s);
   uint8_t slots = (len + 3) / 4;
   char slot[5];
 
@@ -308,9 +278,14 @@ void Adafruit_Si4713::setRDSbuffer(char *s) {
     memcpy(_i2ccommand + 4, s, min(4, (int)strlen(s)));
     s += 4;
     _i2ccommand[8] = 0;
-    // Serial.print("Set buff #"); Serial.print(i);
-    // char *slot = (char *)( _i2ccommand+4);
-    // Serial.print(" to '"); Serial.print(slot); Serial.println("'");
+#ifdef SI4713_CMD_DEBUG
+    Serial.print("Set buff #");
+    Serial.print(i);
+    char *slot = (char *)(_i2ccommand + 4);
+    Serial.print(" to '");
+    Serial.print(slot);
+    Serial.println("'");
+#endif
     _i2ccommand[0] = SI4710_CMD_TX_RDS_BUFF;
     if (i == 0)
       _i2ccommand[1] = 0x06;
@@ -321,61 +296,6 @@ void Adafruit_Si4713::setRDSbuffer(char *s) {
     _i2ccommand[3] = i;
     sendCommand(8);
   }
-
-  /*
-  // set time
-   _i2ccommand[0] = SI4710_CMD_TX_RDS_BUFF;
-   _i2ccommand[1] = 0x84;
-   _i2ccommand[2] = 0x40; // RTC
-   _i2ccommand[3] = 01;
-   _i2ccommand[4] = 0xA7;
-   _i2ccommand[5] = 0x0B;
-   _i2ccommand[6] = 0x2D;
-   _i2ccommand[7] = 0x6C;
-   sendCommand(8);
-
-   Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)6);
-   Wire.read(); // status
-   Serial.print("FIFO overflow: 0x"); Serial.println(Wire.read(), HEX);
-   Serial.print("Circ avail: "); Serial.println(Wire.read());
-   Serial.print("Circ used: "); Serial.println(Wire.read());
-   Serial.print("FIFO avail: "); Serial.println(Wire.read());
-   Serial.print("FIFO used: "); Serial.println(Wire.read());
-   */
-
-  // enable!
-  // Serial.println("Enable RDS");
-  setProperty(SI4713_PROP_TX_COMPONENT_ENABLE, 0x0007); // stereo, pilot+rds
-  /*
-  // wait till ready
-  while (getStatus() != 0x80) {
-    Serial.println(getStatus(), HEX);
-    delay(100);
-  }
-  delay(500);
-  _i2ccommand[0] = SI4710_CMD_TX_RDS_BUFF;
-  _i2ccommand[1] = 0x01; // clear RDSINT
-  _i2ccommand[2] = 0x0;
-  _i2ccommand[3] = 0x0;
-  _i2ccommand[4] = 0x0;
-  _i2ccommand[5] = 0x0;
-  _i2ccommand[6] = 0x0;
-  _i2ccommand[7] = 0x0;
-   sendCommand(8);
-   // get reply!
-   Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)6);
-   for (uint8_t x=0; x<7; x++) {
-     Wire.read();
-   }
-   */
-  /*   or you can read the status
-  Wire.read(); // status
-  Serial.print("FIFO overflow: 0x"); Serial.println(Wire.read(), HEX);
-  Serial.print("Circ avail: "); Serial.println(Wire.read());
-  Serial.print("Circ used: "); Serial.println(Wire.read());
-  Serial.print("FIFO avail: "); Serial.println(Wire.read());
-  Serial.print("FIFO used: "); Serial.println(Wire.read());
-  */
 }
 
 /*!
@@ -383,11 +303,9 @@ void Adafruit_Si4713::setRDSbuffer(char *s) {
  *    @return status bits
  */
 uint8_t Adafruit_Si4713::getStatus() {
-  _wire->beginTransmission(_i2caddr);
-  _wire->write(SI4710_CMD_GET_INT_STATUS);
-  _wire->endTransmission();
-  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
-  return _wire->read();
+  uint8_t resp[1] = {SI4710_CMD_GET_INT_STATUS};
+  i2c_dev->write_then_read(resp, 1, resp, 1);
+  return resp[0];
 }
 
 /*!
@@ -426,32 +344,29 @@ void Adafruit_Si4713::powerUp() {
 uint8_t Adafruit_Si4713::getRev() {
   _i2ccommand[0] = SI4710_CMD_GET_REV;
   _i2ccommand[1] = 0;
-
   sendCommand(2);
 
-  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)9);
+  uint8_t pn, fw, patch, cmp, chiprev, resp[9];
+  i2c_dev->read(resp, 9);
+  pn = resp[1];
+  fw = (uint16_t(resp[2]) << 8) | resp[3];
+  patch = (uint16_t(resp[4]) << 8) | resp[5];
+  cmp = (uint16_t(resp[6]) << 8) | resp[7];
+  chiprev = resp[8];
 
-  _wire->read();
-  uint8_t pn = _wire->read();
-  uint8_t fw = _wire->read();
-  fw <<= 8;
-  fw |= _wire->read();
-  uint8_t patch = _wire->read();
-  patch <<= 8;
-  patch |= _wire->read();
-  uint8_t cmp = _wire->read();
-  cmp <<= 8;
-  cmp |= _wire->read();
-  uint8_t chiprev = _wire->read();
-
-  /*
-  Serial.print("Part # Si47"); Serial.print(pn);
-  Serial.print("-"); Serial.println(fw, HEX);
-
-  Serial.print("Firmware 0x"); Serial.println(fw, HEX);
-  Serial.print("Patch 0x"); Serial.println(patch, HEX);
-  Serial.print("Chip rev "); Serial.write(chiprev); Serial.println();
-  */
+#ifdef SI4713_CMD_DEBUG
+  Serial.print("Part # Si47");
+  Serial.print(pn);
+  Serial.print("-");
+  Serial.println(fw, HEX);
+  Serial.print("Firmware 0x");
+  Serial.println(fw, HEX);
+  Serial.print("Patch 0x");
+  Serial.println(patch, HEX);
+  Serial.print("Chip rev ");
+  Serial.write(chiprev);
+  Serial.println();
+#endif
 
   return pn;
 }
@@ -462,10 +377,11 @@ uint8_t Adafruit_Si4713::getRev() {
  *            bit value
  */
 void Adafruit_Si4713::setGPIOctrl(uint8_t x) {
-  // Serial.println("GPIO direction");
+#ifdef SI4713_CMD_DEBUG
+  Serial.println("GPIO direction");
+#endif
   _i2ccommand[0] = SI4710_CMD_GPO_CTL;
   _i2ccommand[1] = x;
-
   sendCommand(2);
 }
 
@@ -475,9 +391,10 @@ void Adafruit_Si4713::setGPIOctrl(uint8_t x) {
  *            bit value
  */
 void Adafruit_Si4713::setGPIO(uint8_t x) {
-  // Serial.println("GPIO set");
+#ifdef SI4713_CMD_DEBUG
+  Serial.println("GPIO set");
+#endif
   _i2ccommand[0] = SI4710_CMD_GPO_SET;
   _i2ccommand[1] = x;
-
   sendCommand(2);
 }
