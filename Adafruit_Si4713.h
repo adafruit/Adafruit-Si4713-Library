@@ -20,12 +20,8 @@
  *  BSD license, all text above must be included in any redistribution
  */
 
-#if (ARDUINO >= 100)
 #include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
-#include <Wire.h>
+#include <Adafruit_I2CDevice.h>
 
 //#define SI471X_CMD_DEBUG
 #define SI4710_ADDR0 0x11      ///< if SEN is low
@@ -190,6 +186,5 @@ private:
 
   int8_t _rst;
   uint8_t _i2ccommand[10]; // holds the command buffer
-  uint8_t _i2caddr;
-  TwoWire *_wire;
+  Adafruit_I2CDevice *i2c_dev = NULL;
 };
