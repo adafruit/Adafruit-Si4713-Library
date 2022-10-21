@@ -239,7 +239,7 @@ void Adafruit_Si4713::beginRDS(uint16_t programID) {
  *    @param  *s
  *            string to load
  */
-void Adafruit_Si4713::setRDSstation(char *s) {
+void Adafruit_Si4713::setRDSstation(const char *s) {
   uint8_t len = strlen(s);
   uint8_t slots = (len + 3) / 4;
 
@@ -268,10 +268,9 @@ void Adafruit_Si4713::setRDSstation(char *s) {
  *    @param  *s
  *            string to load
  */
-void Adafruit_Si4713::setRDSbuffer(char *s) {
+void Adafruit_Si4713::setRDSbuffer(const char *s) {
   uint8_t len = strlen(s);
   uint8_t slots = (len + 3) / 4;
-  char slot[5];
 
   for (uint8_t i = 0; i < slots; i++) {
     memset(_i2ccommand, ' ', 8); // clear it with ' '
@@ -346,15 +345,17 @@ uint8_t Adafruit_Si4713::getRev() {
   _i2ccommand[1] = 0;
   sendCommand(2);
 
-  uint8_t pn, fw, patch, cmp, chiprev, resp[9];
+  uint8_t pn, resp[9];
   i2c_dev->read(resp, 9);
   pn = resp[1];
+
+#ifdef SI4713_CMD_DEBUG
+  uint8_t fw, patch, cmp, chiprev;
   fw = (uint16_t(resp[2]) << 8) | resp[3];
   patch = (uint16_t(resp[4]) << 8) | resp[5];
   cmp = (uint16_t(resp[6]) << 8) | resp[7];
   chiprev = resp[8];
 
-#ifdef SI4713_CMD_DEBUG
   Serial.print("Part # Si47");
   Serial.print(pn);
   Serial.print("-");
