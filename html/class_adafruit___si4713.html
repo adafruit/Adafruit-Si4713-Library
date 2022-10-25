@@ -117,12 +117,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a07820dd02499a83273cbc6fa290a357c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___si4713.html#a07820dd02499a83273cbc6fa290a357c">beginRDS</a> (uint16_t programID=0xADAF)</td></tr>
 <tr class="memdesc:a07820dd02499a83273cbc6fa290a357c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Begin RDS Sets properties as follows: SI4713_PROP_TX_AUDIO_DEVIATION: 66.25KHz, SI4713_PROP_TX_RDS_DEVIATION: 2KHz, SI4713_PROP_TX_RDS_INTERRUPT_SOURCE: 1, SI4713_PROP_TX_RDS_PS_MIX: 50% mix (default value), SI4713_PROP_TX_RDS_PS_MISC: 0x1008, SI4713_PROP_TX_RDS_PS_REPEAT_COUNT: 3, SI4713_PROP_TX_RDS_MESSAGE_COUNT: 1, SI4713_PROP_TX_RDS_PS_AF: 0xE0E0, SI4713_PROP_TX_RDS_FIFO_SIZE: 0, SI4713_PROP_TX_COMPONENT_ENABLE: 7.  <a href="#a07820dd02499a83273cbc6fa290a357c">More...</a><br /></td></tr>
 <tr class="separator:a07820dd02499a83273cbc6fa290a357c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aefe239a879b600efefde1346fcef84c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___si4713.html#aefe239a879b600efefde1346fcef84c9">setRDSstation</a> (char *s)</td></tr>
-<tr class="memdesc:aefe239a879b600efefde1346fcef84c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the RDS station string.  <a href="#aefe239a879b600efefde1346fcef84c9">More...</a><br /></td></tr>
-<tr class="separator:aefe239a879b600efefde1346fcef84c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fddf5c4ccc16e8d36b29b1620e92d0a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___si4713.html#a7fddf5c4ccc16e8d36b29b1620e92d0a">setRDSbuffer</a> (char *s)</td></tr>
-<tr class="memdesc:a7fddf5c4ccc16e8d36b29b1620e92d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries the status of the RDS Group Buffer and loads new data into buffer.  <a href="#a7fddf5c4ccc16e8d36b29b1620e92d0a">More...</a><br /></td></tr>
-<tr class="separator:a7fddf5c4ccc16e8d36b29b1620e92d0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2fc3e894c85c08aa765175c3f71bceb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___si4713.html#ac2fc3e894c85c08aa765175c3f71bceb">setRDSstation</a> (const char *s)</td></tr>
+<tr class="memdesc:ac2fc3e894c85c08aa765175c3f71bceb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the RDS station string.  <a href="#ac2fc3e894c85c08aa765175c3f71bceb">More...</a><br /></td></tr>
+<tr class="separator:ac2fc3e894c85c08aa765175c3f71bceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49c1940f8e684ef585e46468df77a580"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___si4713.html#a49c1940f8e684ef585e46468df77a580">setRDSbuffer</a> (const char *s)</td></tr>
+<tr class="memdesc:a49c1940f8e684ef585e46468df77a580"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries the status of the RDS Group Buffer and loads new data into buffer.  <a href="#a49c1940f8e684ef585e46468df77a580">More...</a><br /></td></tr>
+<tr class="separator:a49c1940f8e684ef585e46468df77a580"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a665e113cca98f6a36565bfa39887c2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___si4713.html#a0a665e113cca98f6a36565bfa39887c2">setGPIO</a> (uint8_t x)</td></tr>
 <tr class="memdesc:a0a665e113cca98f6a36565bfa39887c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets GP1 / GP2 output level (low or high).  <a href="#a0a665e113cca98f6a36565bfa39887c2">More...</a><br /></td></tr>
 <tr class="separator:a0a665e113cca98f6a36565bfa39887c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -418,8 +418,8 @@ int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 
 </div>
 </div>
-<a id="aefe239a879b600efefde1346fcef84c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aefe239a879b600efefde1346fcef84c9">&#9670;&nbsp;</a></span>setRDSstation()</h2>
+<a id="ac2fc3e894c85c08aa765175c3f71bceb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2fc3e894c85c08aa765175c3f71bceb">&#9670;&nbsp;</a></span>setRDSstation()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -427,7 +427,7 @@ int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
         <tr>
           <td class="memname">void Adafruit_Si4713::setRDSstation </td>
           <td>(</td>
-          <td class="paramtype">char *&#160;</td>
+          <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>s</em></td><td>)</td>
           <td></td>
         </tr>
@@ -444,8 +444,8 @@ int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 
 </div>
 </div>
-<a id="a7fddf5c4ccc16e8d36b29b1620e92d0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7fddf5c4ccc16e8d36b29b1620e92d0a">&#9670;&nbsp;</a></span>setRDSbuffer()</h2>
+<a id="a49c1940f8e684ef585e46468df77a580"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49c1940f8e684ef585e46468df77a580">&#9670;&nbsp;</a></span>setRDSbuffer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -453,7 +453,7 @@ int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
         <tr>
           <td class="memname">void Adafruit_Si4713::setRDSbuffer </td>
           <td>(</td>
-          <td class="paramtype">char *&#160;</td>
+          <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>s</em></td><td>)</td>
           <td></td>
         </tr>
