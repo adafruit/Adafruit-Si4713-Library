@@ -168,8 +168,8 @@ public:
 
   // RDS stuff
   void beginRDS(uint16_t programID = 0xADAF);
-  void setRDSstation(char *s);
-  void setRDSbuffer(char *s);
+  void setRDSstation(const char *s);
+  void setRDSbuffer(const char *s);
 
   uint16_t currFreq;  ///< current frequency
   uint8_t currdBuV,   ///< current BuV
