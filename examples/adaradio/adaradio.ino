@@ -37,6 +37,8 @@ void setup() {
     while (1);
   }
 
+  delay(1000);  // may be needed for initial power timing; increase to 2000 if radio does not consistently start up
+  
   // Uncomment to scan power of entire range from 87.5 to 108.0 MHz
   /*
   for (uint16_t f  = 8750; f<10800; f+=10) {
