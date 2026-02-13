@@ -35,7 +35,9 @@
  *            number of pin where reset is connected
  *
  */
-Adafruit_Si4713::Adafruit_Si4713(int8_t resetpin) { _rst = resetpin; }
+Adafruit_Si4713::Adafruit_Si4713(int8_t resetpin) {
+  _rst = resetpin;
+}
 
 /*!
  *    @brief  Setups the i2c and calls powerUp function.
@@ -46,7 +48,7 @@ Adafruit_Si4713::Adafruit_Si4713(int8_t resetpin) { _rst = resetpin; }
  *    @return True if initialization was successful, otherwise false.
  *
  */
-bool Adafruit_Si4713::begin(uint8_t addr, TwoWire *theWire) {
+bool Adafruit_Si4713::begin(uint8_t addr, TwoWire* theWire) {
   if (i2c_dev)
     delete i2c_dev;
   i2c_dev = new Adafruit_I2CDevice(addr, theWire);
@@ -239,7 +241,7 @@ void Adafruit_Si4713::beginRDS(uint16_t programID) {
  *    @param  *s
  *            string to load
  */
-void Adafruit_Si4713::setRDSstation(const char *s) {
+void Adafruit_Si4713::setRDSstation(const char* s) {
   uint8_t len = strlen(s);
   uint8_t slots = (len + 3) / 4;
 
@@ -251,7 +253,7 @@ void Adafruit_Si4713::setRDSstation(const char *s) {
 #ifdef SI4713_CMD_DEBUG
     Serial.print("Set slot #");
     Serial.print(i);
-    char *slot = (char *)(_i2ccommand + 2);
+    char* slot = (char*)(_i2ccommand + 2);
     Serial.print(" to '");
     Serial.print(slot);
     Serial.println("'");
@@ -268,7 +270,7 @@ void Adafruit_Si4713::setRDSstation(const char *s) {
  *    @param  *s
  *            string to load
  */
-void Adafruit_Si4713::setRDSbuffer(const char *s) {
+void Adafruit_Si4713::setRDSbuffer(const char* s) {
   uint8_t len = strlen(s);
   uint8_t slots = (len + 3) / 4;
 
@@ -280,7 +282,7 @@ void Adafruit_Si4713::setRDSbuffer(const char *s) {
 #ifdef SI4713_CMD_DEBUG
     Serial.print("Set buff #");
     Serial.print(i);
-    char *slot = (char *)(_i2ccommand + 4);
+    char* slot = (char*)(_i2ccommand + 4);
     Serial.print(" to '");
     Serial.print(slot);
     Serial.println("'");
